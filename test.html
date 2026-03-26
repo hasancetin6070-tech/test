@@ -1,0 +1,238 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #1f1f1f, #3a3a3a);
+    color: white;
+}
+
+/* BAŞLIK */
+h1 {
+    text-align: center;
+    margin-top: 40px;
+    font-size: 44px;
+}
+
+/* KONTEYNER */
+.container {
+    width: 90%;
+    max-width: 700px;
+    margin: 30px auto;
+}
+
+/* SORU */
+.question {
+    background: #2b2b2b;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 15px;
+    transition: 0.3s;
+}
+
+.question:hover {
+    transform: scale(1.02);
+}
+
+label {
+    display: block;
+    padding: 8px;
+    margin: 5px 0;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+label:hover {
+    background: #444;
+}
+
+/* BUTON */
+button {
+    display: block;
+    margin: 30px auto;
+    padding: 15px 30px;
+    font-size: 18px;
+    border: none;
+    border-radius: 30px;
+    background: #ff3b3b;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #ff0000;
+    transform: scale(1.05);
+}
+
+/* LOADING EKRANI */
+#loadingScreen {
+    display: none;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+/* LOADER */
+.loader {
+    border: 6px solid #444;
+    border-top: 6px solid red;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* SONUÇ */
+#resultScreen {
+    display: none;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.resultText {
+    font-size: 50px;
+    font-weight: bold;
+    color: red;
+    text-align: center;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0% {opacity: 1;}
+    50% {opacity: 0;}
+    100% {opacity: 1;}
+}
+
+.retryBtn {
+    margin-top: 30px;
+    background: white;
+    color: black;
+}
+</style>
+</head>
+
+<body>
+
+<!-- TEST -->
+<div id="quizScreen">
+<h1>NE KADAR ENAYİSİNİZ?</h1>
+<div class="container" id="quiz"></div>
+<button onclick="calculateScore()">SONUCU GÖR</button>
+</div>
+
+<!-- LOADING -->
+<div id="loadingScreen">
+    <div class="loader"></div>
+    <h2>Analiz ediliyor...</h2>
+</div>
+
+<!-- SONUÇ -->
+<div id="resultScreen">
+    <div class="resultText" id="finalResult"></div>
+    <button class="retryBtn" onclick="location.reload()">TEKRAR DENE</button>
+</div>
+
+<script>
+const answers = [
+    "Hayat Tarzım",
+    "Bana çok uyuyor",
+    "Uyuyor",
+    "Eh işte",
+    "Yok artık daha neler"
+];
+
+const scores = [10, 9, 7, 5, 2];
+
+const questions = [
+"İlk kez buluşacaksınız. Hesabı erkeksen sen ödersin, kadınsan karşı tarafın ödemesini isterim",
+"İlk buluşmayı atlattın hatta 2-3 kez buluştunuz. Partnerin 'bir yerden para bekliyorum , o gelse çok rahatlıycam, o gelene kadar bana bi 5 bin ateşler misin?' dedi, verir misin?",
+"Aşk böceğinle yemeğe çıktınız. İkiniz de yemek siparişi verdi. Partnerin yemeğini bitiremedi hatta sen onun yemeğinden, ondan daha fazla yedin. Sırf bu nedenle onun yemeğini de ödemeyi teklif eder misin?",
+"Hiç kimseye fotoğraf makinesi aldın mı?",
+"Partnerin bir konuda yardıma ihtiyacı var, mesela ev boyama. Bedava boyar mısın?",
+"Partnerine kimlik fotokopini, tc kimlik numaranı ve boş kağıda bir imza örneğini verir misin?",
+"Yaaa aşkiloton biraz nakite sıkışmış. Kredi kartını istiyor verir misin?",
+"Sevdiceğinle beraber yaşamak istiyorsun ama bütün masrafları senin ödemen gerekiyor. Yaparsın di mi?",
+"Ayrıldınız ama partnerin evde kalmak istiyor ve kirayı senin ödemen gerekiyor. Yaparsın di mi?",
+"Partnerin seni evden çıkarıp tek başına yaşayacak ama kirayı yine sen ödeyeceksin. Yaparsın di mi?"
+];
+
+const quizDiv = document.getElementById("quiz");
+
+questions.forEach((q, index) => {
+    let div = document.createElement("div");
+    div.classList.add("question");
+
+    let html = `<p><b>${index + 1}. ${q}</b></p>`;
+
+    answers.forEach((ans, i) => {
+        html += `
+        <label>
+            <input type="radio" name="q${index}" value="${scores[i]}">
+            ${String.fromCharCode(97 + i)}) ${ans}
+        </label>`;
+    });
+
+    div.innerHTML = html;
+    quizDiv.appendChild(div);
+});
+
+function calculateScore() {
+    let total = 0;
+
+    for (let i = 0; i < questions.length; i++) {
+        let selected = document.querySelector(`input[name="q${i}"]:checked`);
+
+        if (!selected) {
+            alert("Tüm soruları cevaplamalısın!");
+            return;
+        }
+
+        total += parseInt(selected.value);
+    }
+
+    let resultText = "";
+
+    if (total >= 85) {
+        resultText = "SENİN GİBİ ENAYİ ZOR BULUNUR!!!";
+    } else if (total >= 70) {
+        resultText = "TAM BİR ENAYİSİN";
+    } else if (total >= 50) {
+        resultText = "HER İNSAN BİRAZ ENAYİDİR";
+    } else if (total >= 25) {
+        resultText = "ÇAKAAAAAAL";
+    } else {
+        resultText = "DAHA ÇOK FALCI FALCI GEZERSİN";
+    }
+
+    // TESTİ GİZLE
+    document.getElementById("quizScreen").style.display = "none";
+
+    // LOADING GÖSTER
+    document.getElementById("loadingScreen").style.display = "flex";
+
+    // 5 SANİYE SONRA SONUÇ
+    setTimeout(() => {
+        document.getElementById("loadingScreen").style.display = "none";
+        document.getElementById("resultScreen").style.display = "flex";
+        document.getElementById("finalResult").innerText = resultText;
+    }, 5000);
+}
+</script>
+
+</body>
+</html>
